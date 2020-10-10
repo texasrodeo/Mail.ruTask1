@@ -1,19 +1,21 @@
 import com.google.gson.Gson;
-import factory.LibraryFactory;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import exceptions.LibraryNotEnoughSpaceException;
+import factory.books.BookFactory;
+import factory.library.LibraryFactory;
 import library.Library;
-import model.Book;
-
-import java.util.List;
 
 public class Application {
     public static void main(String[] args) {
-        LibraryFactory libraryFactory = new LibraryFactory();
-        Library library = libraryFactory.getLibrary();
-
-        Gson gson = new Gson();
-        library.getBooks(args[0], args[1]).forEach(b ->
-            System.out.println(gson.toJson(b))
-        );
+        final Injector injector = Guice.createInjector(new MyModule(args[0]));
+        try {
+            Library library = injector.getInstance(LibraryFactory.class).library(Integer.parseInt(args[1]));
+            System.out.println(library);
+        }
+        catch (LibraryNotEnoughSpaceException ex){
+            System.out.println(ex.getMessage());
+        }
 
     }
 }
